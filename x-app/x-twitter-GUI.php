@@ -1,4 +1,11 @@
 <?php
+/*
+Plugin Name: X-Twitter-Plugin
+Description: A plugin to create and delete tweets.
+Version: 1.0
+Author: 
+*/
+
 // Enqueue the JavaScript file
 function enqueue_x_twitter_scripts() {
     wp_enqueue_script('x-twitter-forms', plugins_url('/x-twitter-forms.js', __FILE__), array('jquery'), '1.0', true);
@@ -7,7 +14,7 @@ add_action('wp_enqueue_scripts', 'enqueue_x_twitter_scripts');
 
 // Create the x_twitter_proxy_endpoint_function
 function x_twitter_proxy_endpoint_function() {
-    $Bearer_Token = "Bearer_Token"; // Replace with actual Bearer Token
+    $Bearer_Token = "AAAAAAAAAAAAAAAAAAAAAKGzpwEAAAAAuVAgSvRyNqlIAm6kyf%2BI3aOGaek%3DcULZR3mRlJF5ehTaVdczOGXYGj5rh79YC8TfkZ1LTxm8WNLGOK"; // Replace with actual Bearer Token
     $url = "http://localhost:5000"; // Replace with actual Flask app URL
 
     if ($_POST['method'] == 'create') {
