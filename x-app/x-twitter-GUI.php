@@ -14,34 +14,39 @@ add_action('wp_enqueue_scripts', 'enqueue_x_twitter_scripts');
 
 // Create the x_twitter_proxy_endpoint_function
 function x_twitter_proxy_endpoint_function() {
-    $Bearer_Token = "AAAAAAAAAAAAAAAAAAAAAKGzpwEAAAAAuVAgSvRyNqlIAm6kyf%2BI3aOGaek%3DcULZR3mRlJF5ehTaVdczOGXYGj5rh79YC8TfkZ1LTxm8WNLGOK"; // Replace with actual Bearer Token
-    $url = "http://localhost:5000"; // Replace with actual Flask app URL
+    error_log("Received POST data: " . print_r($_POST, true));
+    $url = "http://x-twitter-flask-app:5000"; // Replace with actual Flask app URL
 
     if ($_POST['method'] == 'create') {
         $tweet_content = $_POST['tweet_content'];
         $response = wp_remote_post($url . "/create_tweet", array(
-            'headers' => array('Authorization' => 'Bearer ' . $Bearer_Token),
-            'body' => array('tweet_content' => $tweet_content)
+            'headers' => array(
+                'Content-Type' => 'application/json'
+            ),
+            'body' => json_encode(array('text' => $tweet_content))
         ));
     } else if ($_POST['method'] == 'delete') {
         $tweet_id = $_POST['tweet_id'];
-        $response = wp_remote_post($url . "/delete_tweet", array(
-            'headers' => array('Authorization' => 'Bearer ' . $Bearer_Token),
-            'body' => array('tweet_id' => $tweet_id)
+        $response = wp_remote_request($url . "/delete_tweet", array(
+            'method' => 'DELETE',
+            'headers' => array(
+                'Content-Type' => 'application/json'
+            ),
+            'body' => json_encode(array('tweet_id' => $tweet_id))
         ));
-    } else if ($_POST['method'] == 'retrieve') {
-        $response = wp_remote_get($url . "/retrieve_tweet", array(
-            'headers' => array('Authorization' => 'Bearer ' . $Bearer_Token)
-        ));
-    }
+        error_log("Received response from Flask app: " . wp_remote_retrieve_body($response));
 
-    if (is_wp_error($response)) {
-        echo 'Error: ' . $response->get_error_message();
-    } else {
-        echo $response['body'];
-    }
+        if (is_wp_error($response)) {
+            echo json_encode(array(
+                'success' => false,
+                'message' => 'Error: ' . $response->get_error_message(),
+            ));
+        } else {
+            echo $response['body'];
+        }
 
-    die();
+        die();
+    }
 }
 add_action('wp_ajax_x_twitter_proxy_endpoint', 'x_twitter_proxy_endpoint_function');
 add_action('wp_ajax_nopriv_x_twitter_proxy_endpoint', 'x_twitter_proxy_endpoint_function');
@@ -58,7 +63,7 @@ function x_twitter_shortcode_function() {
     </div>
     <div id="delete_tweet_div">
         <form id="delete_tweet_form">
-            <input type="hidden" id="tweet_id" name="tweet_id">
+            <textarea id="tweet_id" name="tweet_id" rows="4" cols="50"></textarea>
             <input type="submit" value="Delete Tweet">
         </form>
     </div>
