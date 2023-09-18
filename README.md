@@ -35,5 +35,4 @@ To set up the plugin:
 
 
 
-This is a team-project with Joash Muganda, Suresh Sharma, and Alexis Ambriz. 
-It is currently a work-in-progress~!
+This is a team-project with Joash Muganda, Suresh Ravuri, and Alexis Ambriz. 
