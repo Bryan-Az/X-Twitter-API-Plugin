@@ -1,3 +1,5 @@
+This is a team-project with Joash Muganda, Suresh Ravuri, and Alexis Ambriz, we didn't specify who wrote which code however we all assisted each-other during development.
+
 The base-line code was partially generated using iterative chatGPT-4 prompts using the command-line 'gpt-engineer' tool here: https://github.com/AntonOsika/gpt-engineer.
 We used Tweepy library with Twitter's API Version 1.1, using the developer tool found at https://developer.twitter.com/en/portal/dashboard
 To use this wordpress-plugin, you would need to make an account, set up your user authentication settings, 
@@ -35,4 +37,4 @@ To set up the plugin:
 
 
 
-This is a team-project with Joash Muganda, Suresh Ravuri, and Alexis Ambriz. 
+
