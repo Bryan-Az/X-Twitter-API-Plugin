@@ -1,4 +1,5 @@
 import tweepy
+import os
 from flask import Flask, request, jsonify
 from requests_oauthlib import OAuth1
 import json
@@ -16,37 +17,44 @@ handler.setFormatter(formatter)
 root.addHandler(handler)
 
 
-apiKey = "AfCab4Z23XbAbkLlr5ofeljme"
-apiSecretKey = "8HmOsrH6YMfOoxxXDlWVD1r7CYM54ICeSokYLL8A60iZZmFryE"
+apiKey = os.getenv('API_KEY', 'use_your_api')
+apiSecretKey = os.getenv('API_SECRET_KEY', 'use_your_api')
+accessToken = os.getenv('ACCESS_TOKEN', 'use_your_api')
+accessTokenSecret = os.getenv('ACCESS_TOKEN_SECRET', 'use_your_api')
 
-accessToken = "4254075494-9bHKb2KRMQFxXP9nL76IUo15DC8F0yIkHnLrHgk"
-accessTokenSecret = "uL5oHPgfglZC8yEmzJN5Ntv7gyYlzhe0kmkaEMWrp5Q2g"
+tweepyAuth = tweepy.Client(
+    consumer_key=apiKey,
+    consumer_secret=apiSecretKey,
+    access_token= accessToken,
+    access_token_secret=accessTokenSecret
+)
 
 oauth = OAuth1(apiKey, apiSecretKey, accessToken, accessTokenSecret)
 
 @app.route('/create_tweet', methods=['POST'])
 def create_tweet():
     app.logger.info('Received JSON data: %s', request.json)
-    tweetText = request.json['text']
-    tweetURL = "https://api.twitter.com/1.1/statuses/update.json"
-    response = requests.post(tweetURL, auth=oauth, params={'status': tweetText})
-    app.logger.info('Sending response: %s', response.text)
-    if response.status_code == 201:
+    tweetText = request.json['tweet_content']
+    try:
+        response = tweepyAuth.create_tweet(text=tweetText)
+        app.logger.info('Tweet created with ID: %s', response.data['id'])
         return jsonify(success=True, message="Tweet sent!")
-    else:
-        jsonify(success=False, message=f"Tweet was not sent. Status code: {response.status_code}, Message: {response.text}")
+    except tweepy.TweepyException as e:
+        app.logger.error('Error creating tweet: %s', e.response.text)
+        return jsonify(success=False, message=f"Tweet was not sent. Error: {e.response.text}")
 
 @app.route('/delete_tweet', methods=['DELETE'])
 def delete_tweet():
     app.logger.info('Received JSON data: %s', request.json)
     tweetID = request.json['tweet_id']
-    tweetURL = f"https://api.twitter.com/2/tweets/{tweetID}"
-    response = requests.delete(tweetURL, auth=oauth)
-    app.logger.info('Sending response: %s', response.text)
-    if response.status_code in [200, 204]:  
+
+    try:
+        response = tweepyAuth.delete_tweet(id=tweetID)
+        app.logger.info('Tweet with ID %s was deleted', tweetID)
         return jsonify(success=True, message="Tweet was deleted!")
-    else:
-        return jsonify(success=False, message=f"Tweet was not deleted. Status code: {response.status_code}, Message: {response.text}")
+    except tweepy.TweepyException as e:
+        app.logger.error('Error deleting tweet: %s', e.response.text)
+        return jsonify(success=False, message=f"Tweet was not deleted. Error: {e.response.text}")
 
 if __name__ == "__main__":
     app.run(debug=True)
